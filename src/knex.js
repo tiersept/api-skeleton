@@ -8,7 +8,7 @@ export default require( 'knex' )( {
         user: 'api',
         password: 'api',
 
-        database: 'hapi-api',
+        database: 'hapi_cms',
         charset: 'utf8',
 
     }

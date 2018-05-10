@@ -1,20 +1,109 @@
 import Knex from './knex';
 import jwt from 'jsonwebtoken';
 import GUID from 'node-uuid';
+import * as R from 'ramda';
 
 const routes = [
 
+
+    {
+        path: '/users/',
+        method: 'GET',
+        handler: async (request, reply ) => {
+
+          try {
+            console.log('/USERS handler ')
+
+            const query = Knex('users')
+              .select('name', 'email');
+
+            const results = await query;
+
+            if (!R.isNil(results)) {
+              //transform?
+              reply(results)
+
+            } else {
+                return reply([]);
+            }
+          } catch(error) {
+            console.error("/users-error: ", error)
+          }
+
+        }
+    },
+
+    {
+        path: '/users/',
+        method: 'POST',
+        handler: async (request, reply ) => {
+          try {
+            const formFields = request.payload;
+
+            //schema welke valideerd of velden aanwezig en valide zijn
+             let schema = {
+               name: false,
+               username: false,
+               password: false,
+               email: false
+             }
+
+             //pluk alle 'keys' uit de schema object, type: array
+             const requiredFields = Object.keys(schema); //name, username, password, etc
+
+             for (let field of requiredFields) {
+               //zit het vereiste veld in de payload en is t niet null/leeg?
+               if (formFields.hasOwnProperty(field) && !R.isNil(formFields[field])) {
+                 schema[field] = true;
+
+                 console.log('field: ', field, schema[field])
+               }
+             }
+
+             console.log('requiredFields: ', requiredFields)
+
+             //true of false als alle velden true terugggeven als field.key is true
+             //array.prototype functie = mdn Array.prototype
+            let isValidUser = requiredFields.every((field) => {return schema[field] === true})
+
+            console.error('isValid:', isValidUser)
+
+
+            if (isValidUser === true) {
+              //als de vereiste velden aanwezig en valide zijn
+              let insertFields = R.clone(formFields);
+              insertFields.guid = GUID.v4();
+
+              //insert en return mij het nieuw euser record
+              const insertObject = Knex('users')
+                .insert(R.pick(['name', 'username', 'password', 'email', 'guid'], insertFields))
+                .returning('*');
+
+              //reply nieuwe object min het passwordt;
+              return reply(R.omit(['password'], insertObject))
+
+            } else {
+              return reply()
+              //error, niet alle velden zijn meegegeven =>  Build error response
+            }
+          } catch(error) {
+            console.error('NERD= > :', error)
+          }
+        }
+    },
+
+
     {
 
-        path: '/birds',
+        path: '/birds/',
         method: 'GET',
         handler: ( request, reply ) => {
-
             const getOperation = Knex( 'birds' ).where( {
 
                 isPublic: true
 
-            } ).select( 'name', 'species', 'picture_url' ).then( ( results ) => {
+            } ).select( 'name', 'species', 'picture_url' )
+            .then( ( results ) => {
 
                 if( !results || results.length === 0 ) {
 
@@ -39,7 +128,6 @@ const routes = [
                 reply( 'server-side error' );
 
             } );
-
         }
 
     },
@@ -52,7 +140,7 @@ const routes = [
 
             const { username, password } = request.payload;
 
-            const getOperation = Knex( 'users' ).where( {
+            const query = Knex( 'users' ).where( {
 
                 username,
 
@@ -99,7 +187,7 @@ const routes = [
                 }
 
             } ).catch( ( err ) => {
-
+              console.error('error-auth: ', err)
                 reply( 'server-side error' );
 
             } );
