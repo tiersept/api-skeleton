@@ -1,0 +1,18 @@
+{
+  "name": "hapi-cms",
+  "version": "1.0.0",
+  "devDependencies": {
+    "babel-core": "^6.20.0",
+    "babel-preset-es2015": "^6.18.0"
+  },
+  "dependencies": {
+    "hapi": "^16.0.1",
+    "hapi-auth-jwt": "^4.0.0",
+    "jsonwebtoken": "^7.2.1",
+    "knex": "^0.12.6",
+    "mysql": "^2.12.0"
+  },
+  "scripts": {
+    "start": "node bootstrap.js"
+  }
+}
