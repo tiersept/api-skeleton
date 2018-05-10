@@ -8,12 +8,12 @@ module.exports = {
         client: 'mysql',
         connection: {
 
-            host: '192.168.33.10',
+            host: 'localhost',
 
-            user: 'birdbase',
-            password: 'password',
+            user: 'api',
+            password: 'api',
 
-            database: 'birdbase',
+            database: 'hapi_cms',
             charset: 'utf8',
 
         }
